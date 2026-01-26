@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TagStudio - Pro Label Designer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <nav class="macos-nav">
+        <div class="nav-left">
+            <span class="brand-logo">🏷️</span>
+            <span class="app-name">TagStudio</span>
+        </div>
+        <div class="nav-right">
+            <button id="exportBtn" class="pill-btn secondary">Export PDF</button>
+            <button id="saveBtn" class="pill-btn primary">Save Project</button>
+        </div>
+    </nav>
+
+    <div class="app-layout">
+        
+        <aside class="sidebar glass-panel">
+            
+            <div class="sidebar-section">
+                <h3 class="section-title">Tag Setup</h3>
+                <div class="control-group">
+                    <label>Shape & Type</label>
+                    <select id="canvasShape" class="apple-input">
+                        <option value="hangtag">Hang Tag (Vertical)</option>
+                        <option value="necklabel">Neck Label (Horizontal)</option>
+                        <option value="square">Square Sticker</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Tag Color</label>
+                    <div class="color-picker-wrapper">
+                        <input type="color" id="bgColor" value="#ffffff" class="apple-color">
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="sidebar-section">
+                <h3 class="section-title">Insert Elements</h3>
+                <button id="addTextBtn" class="tool-row">
+                    <span class="icon">Tt</span>
+                    <span class="label">Add Text</span>
+                </button>
+                <button id="addBarcodeBtn" class="tool-row">
+                    <span class="icon">|||</span>
+                    <span class="label">Add Barcode</span>
+                </button>
+                <div class="upload-wrapper">
+                    <label for="imageUpload" class="tool-row">
+                        <span class="icon">🖼️</span>
+                        <span class="label">Upload Logo</span>
+                    </label>
+                    <input type="file" id="imageUpload" accept="image/*" hidden>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div id="propertiesPanel" class="sidebar-section properties-hidden">
+                <h3 class="section-title">Inspector</h3>
+                
+                <div id="textControls">
+                    <div class="control-group">
+                        <label>Content</label>
+                        <input type="text" id="propText" class="apple-input">
+                    </div>
+                    <div class="control-group">
+                        <label>Typography</label>
+                        <select id="propFont" class="apple-input">
+                            <option value="-apple-system, sans-serif">San Francisco</option>
+                            <option value="'Times New Roman', serif">Times New Roman</option>
+                            <option value="'Courier New', monospace">Courier (Code)</option>
+                            <option value="'Brush Script MT', cursive">Script</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Color</label>
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="propColor" class="apple-color">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Size / Scale</label>
+                    <input type="range" id="propSize" min="10" max="300" value="20" class="apple-slider">
+                </div>
+
+                <button id="deleteBtn" class="pill-btn danger">Remove Item</button>
+            </div>
+        </aside>
+
+        <main class="workspace">
+            <div class="canvas-container">
+                <div id="canvasStage" class="tag-canvas hangtag">
+                    <div class="hole-punch"></div> </div>
+                <span class="canvas-label">Drag elements to design</span>
+            </div>
+        </main>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
