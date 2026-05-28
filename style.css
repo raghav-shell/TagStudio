@@ -295,3 +295,26 @@ body {
 
     .draggable { border: none !important; background: transparent !important; }
 }
+
+/* --- 9. MOBILE & TABLET RESPONSIVENESS --- */
+@media (max-width: 768px) {
+    .app-layout {
+        flex-direction: column;
+        overflow-y: auto;
+        height: calc(100vh - 50px);
+    }
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-top: 1px solid rgba(0,0,0,0.1);
+        height: auto;
+        overflow-y: visible;
+        order: 2; /* Sidebar at the bottom for easy touch access */
+    }
+    .workspace {
+        flex: 1;
+        padding: 40px 10px;
+        min-height: 450px;
+        order: 1; /* Tag designer takes center stage at the top */
+    }
+}

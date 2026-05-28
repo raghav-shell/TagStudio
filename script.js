@@ -104,6 +104,7 @@ document.getElementById('imageUpload').addEventListener('change', (e) => {
         };
         reader.readAsDataURL(file);
     }
+    e.target.value = ''; // Reset input to allow uploading same image file consecutively
 });
 
 // 3. DRAG ENGINE
@@ -132,6 +133,15 @@ window.addEventListener('mousemove', (e) => {
         let newX = e.clientX - stageRect.left - dragOffset.x;
         let newY = e.clientY - stageRect.top - dragOffset.y;
         
+        // Boundary constraints to keep elements completely inside the tag canvas stage
+        const minX = 0;
+        const maxX = stageRect.width - selectedElement.offsetWidth;
+        const minY = 0;
+        const maxY = stageRect.height - selectedElement.offsetHeight;
+        
+        newX = Math.max(minX, Math.min(newX, maxX));
+        newY = Math.max(minY, Math.min(newY, maxY));
+        
         selectedElement.style.left = `${newX}px`;
         selectedElement.style.top = `${newY}px`;
     }
@@ -139,9 +149,11 @@ window.addEventListener('mousemove', (e) => {
 
 window.addEventListener('mouseup', () => { isDragging = false; });
 
-// 4. SELECTION & EDITING
-stage.addEventListener('mousedown', (e) => {
-    if (e.target === stage) deselectAll();
+// 4. SELECTION & EDITING (Deselect if clicking on canvas workspace background)
+document.querySelector('.workspace').addEventListener('mousedown', (e) => {
+    if (!e.target.closest('.draggable')) {
+        deselectAll();
+    }
 });
 
 function selectElement(el) {
@@ -155,7 +167,7 @@ function selectElement(el) {
 
     if (isText) {
         inputs.text.value = el.innerText;
-        inputs.font.value = el.style.fontFamily.replace(/"/g, "");
+        inputs.font.value = el.style.fontFamily.replace(/['"]/g, "");
         inputs.color.value = rgbToHex(el.style.color);
         inputs.size.value = parseInt(el.style.fontSize);
     } else {
@@ -210,11 +222,20 @@ document.getElementById('saveBtn').addEventListener('click', () => {
     };
     
     document.querySelectorAll('.draggable').forEach(el => {
+        let content = '';
+        if (el.dataset.type === 'text') {
+            content = el.innerText;
+        } else if (el.dataset.type === 'barcode') {
+            content = el.querySelector('.barcode-number')?.innerText || '';
+        } else if (el.dataset.type === 'image') {
+            content = el.querySelector('img')?.src || '';
+        }
+
         data.elements.push({
             type: el.dataset.type,
             left: el.style.left,
             top: el.style.top,
-            content: el.dataset.type === 'text' ? el.innerText : (el.querySelector('img')?.src || ''),
+            content: content,
             styles: el.dataset.type === 'text' ? 
                 { fontSize: el.style.fontSize, color: el.style.color, fontFamily: el.style.fontFamily } : 
                 { width: el.firstElementChild.style.width }
@@ -240,5 +261,101 @@ function rgbToHex(rgb) {
     if (!rgb || rgb.startsWith('#')) return rgb || '#000000';
     const rgbValues = rgb.match(/\d+/g);
     if (!rgbValues) return '#000000';
-    return "#" + rgbValues.map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
+    return "#" + rgbValues.slice(0, 3).map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
 }
+
+// 8. LOAD LOGIC (LocalStorage)
+function loadProject() {
+    const saved = localStorage.getItem('tagStudioData');
+    if (!saved) return;
+    
+    try {
+        const data = JSON.parse(saved);
+        
+        // Load shape
+        if (data.shape) {
+            inputs.shape.value = data.shape;
+            stage.className = `tag-canvas ${data.shape}`;
+        }
+        
+        // Load background
+        if (data.bg) {
+            inputs.bg.value = rgbToHex(data.bg);
+            stage.style.backgroundColor = data.bg;
+        }
+        
+        // Clear existing elements (keeping the hole-punch)
+        document.querySelectorAll('.draggable').forEach(el => el.remove());
+        
+        // Recreate saved elements
+        if (Array.isArray(data.elements)) {
+            data.elements.forEach(elData => {
+                const el = createDraggable(elData.type);
+                el.style.left = elData.left;
+                el.style.top = elData.top;
+                
+                if (elData.type === 'text') {
+                    el.innerText = elData.content;
+                    if (elData.styles) {
+                        el.style.fontSize = elData.styles.fontSize;
+                        el.style.color = elData.styles.color;
+                        el.style.fontFamily = elData.styles.fontFamily;
+                    }
+                    el.style.fontWeight = '600';
+                } else if (elData.type === 'barcode') {
+                    const container = document.createElement('div');
+                    container.className = 'barcode-container';
+                    if (elData.styles && elData.styles.width) {
+                        container.style.width = elData.styles.width;
+                    } else {
+                        container.style.width = '120px';
+                    }
+                    
+                    const strip = document.createElement('div');
+                    strip.className = 'barcode-strip';
+                    
+                    const num = document.createElement('div');
+                    num.className = 'barcode-number';
+                    num.innerText = elData.content;
+                    
+                    container.appendChild(strip);
+                    container.appendChild(num);
+                    el.appendChild(container);
+                } else if (elData.type === 'image') {
+                    const img = document.createElement('img');
+                    img.src = elData.content;
+                    if (elData.styles && elData.styles.width) {
+                        img.style.width = elData.styles.width;
+                    } else {
+                        img.style.width = '100px';
+                    }
+                    el.appendChild(img);
+                }
+                
+                stage.appendChild(el);
+            });
+        }
+    } catch (e) {
+        console.error("Error loading saved project:", e);
+    }
+}
+
+// Load project on page load
+if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', loadProject);
+} else {
+    loadProject();
+}
+
+// Keyboard Shortcuts (Delete/Backspace to remove selected element)
+window.addEventListener('keydown', (e) => {
+    if (selectedElement && (e.key === 'Delete' || e.key === 'Backspace')) {
+        const activeEl = document.activeElement;
+        const isInput = activeEl.tagName === 'INPUT' || activeEl.tagName === 'SELECT' || activeEl.tagName === 'TEXTAREA';
+        if (!isInput) {
+            e.preventDefault();
+            selectedElement.remove();
+            deselectAll();
+        }
+    }
+});
