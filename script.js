@@ -258,9 +258,10 @@ document.getElementById('exportBtn').addEventListener('click', () => {
 
 // Helper: RGB to Hex
 function rgbToHex(rgb) {
-    if (!rgb || rgb.startsWith('#')) return rgb || '#000000';
+    if (!rgb || rgb.startsWith('#')) return rgb || '#ffffff';
+    if (rgb === 'transparent' || rgb.replace(/\s/g, '') === 'rgba(0,0,0,0)') return '#ffffff';
     const rgbValues = rgb.match(/\d+/g);
-    if (!rgbValues) return '#000000';
+    if (!rgbValues) return '#ffffff';
     return "#" + rgbValues.slice(0, 3).map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
 }
 
