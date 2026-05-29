@@ -7,6 +7,10 @@
   <img src="https://img.shields.io/badge/Zero_Dependencies-Premium-purple?style=for-the-badge" alt="Zero Dependencies">
 </p>
 
+<p align="center">
+  <strong><a href="https://www.linkedin.com/posts/raghav-sharma-in_webdevelopment-javascript-frontenddevelopment-activity-7466037762207424512-9r20?utm_source=share&utm_medium=member_desktop&rcm=ACoAAGFOz6wBSaTm9xZA7fwXjJUoPEbILtQZqUs">📺 Watch the Demo Video on LinkedIn</a></strong>
+</p>
+
 ---
 
 **TagStudio** is a premium, zero-dependency browser-based workspace engineered for fashion brands and clothing manufacturers. It offers an interactive dashboard to dynamically design, preview, persist, and export manufacturing-ready product tags, neck labels, and square stickers. 
